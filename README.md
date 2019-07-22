@@ -1,8 +1,8 @@
-Operator Status
-===============
+Custom Resource Status
+======================
 
 The purpose of this project is to provide some level of standardization and
-best-practices with respect to managing the status of operators. This project
+best-practices with respect to managing the status of custom resources. This project
 steals, err draws from:
 
 * [Cluster Version Operator (CVO)](https://github.com/openshift/cluster-version-operator)
