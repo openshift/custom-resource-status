@@ -1,8 +1,8 @@
-module github.com/djzager/operator-status
+module github.com/djzager/custom-resource-status
 
 go 1.12
 
 require (
-	k8s.io/api v0.0.0-20190711103429-37c3b8b1ca65
-	k8s.io/apimachinery v0.0.0-20190711103026-7bf792636534
+	k8s.io/api v0.0.0-20190722141453-b90922c02518
+	k8s.io/apimachinery v0.0.0-20190719140911-bfcf53abc9f8
 )
