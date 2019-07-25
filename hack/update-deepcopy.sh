@@ -5,7 +5,7 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 
 verify="${VERIFY:-}"
 
-${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
+bash ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
 	github.com/djzager/custom-resource-status/generated \
 	github.com/djzager/custom-resource-status \
 	"conditions:v1" \
