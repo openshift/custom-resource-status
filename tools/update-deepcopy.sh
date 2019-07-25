@@ -10,5 +10,5 @@ bash ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
 	github.com/openshift/custom-resource-status \
 	"conditions:v1" \
 	"objectreferences:v1" \
-	--go-header-file ${SCRIPT_ROOT}/hack/empty.txt \
+	--go-header-file ${SCRIPT_ROOT}/tools/empty.txt \
 	${verify}
