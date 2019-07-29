@@ -28,6 +28,7 @@ err := r.client.Get(context.TODO(), types.NamespacedName{Name: object.Name, Name
 ...handle err
 
 // Add it to the list of RelatedObjects if found
+// import "k8s.io/client-go/tools/reference"
 objectRef, err := reference.GetReference(r.scheme, found)
 if err != nil {
   return err

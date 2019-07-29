@@ -54,10 +54,11 @@ gonum.org/v1/gonum/internal/cmplx64
 gonum.org/v1/gonum/internal/math32
 # gopkg.in/inf.v0 v0.9.0
 gopkg.in/inf.v0
-# k8s.io/api v0.0.0-20190722141453-b90922c02518
+# k8s.io/api v0.0.0-20190725062911-6607c48751ae
 k8s.io/api/core/v1
 # k8s.io/apimachinery v0.0.0-20190719140911-bfcf53abc9f8
 k8s.io/apimachinery/pkg/apis/meta/v1
+k8s.io/apimachinery/pkg/api/equality
 k8s.io/apimachinery/pkg/api/resource
 k8s.io/apimachinery/pkg/runtime
 k8s.io/apimachinery/pkg/runtime/schema
