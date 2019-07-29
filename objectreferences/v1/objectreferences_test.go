@@ -14,6 +14,7 @@ func TestSetObjectReference(t *testing.T) {
 		testRef      corev1.ObjectReference
 		startRefs    *[]corev1.ObjectReference
 		expectedRefs *[]corev1.ObjectReference
+		shouldError  bool
 	}{
 		{
 			name: "add when empty",
@@ -32,6 +33,7 @@ func TestSetObjectReference(t *testing.T) {
 					APIVersion: "test.example.io",
 				},
 			},
+			shouldError: false,
 		},
 		{
 			name: "simple add",
@@ -63,9 +65,10 @@ func TestSetObjectReference(t *testing.T) {
 					APIVersion: "test.example.io",
 				},
 			},
+			shouldError: false,
 		},
 		{
-			name: "add duplicate reference",
+			name: "replace reference",
 			testRef: corev1.ObjectReference{
 				Kind:       "FooKind",
 				Namespace:  "test-namespace",
@@ -93,6 +96,7 @@ func TestSetObjectReference(t *testing.T) {
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
+					UID:        "fooid",
 				},
 				corev1.ObjectReference{
 					Kind:       "BarKind",
@@ -100,20 +104,30 @@ func TestSetObjectReference(t *testing.T) {
 					Name:       "bar",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
-					Kind:       "FooKind",
-					Namespace:  "test-namespace",
-					Name:       "foo",
-					APIVersion: "test.example.io",
-					UID:        "fooid",
-				},
 			},
+			shouldError: false,
+		},
+		{
+			name: "error on newObject not minObjectReference",
+			testRef: corev1.ObjectReference{
+				Kind:       "FooKind",
+				APIVersion: "test.example.io",
+			},
+			startRefs:    &[]corev1.ObjectReference{},
+			expectedRefs: &[]corev1.ObjectReference{},
+			shouldError:  true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			SetObjectReference(tc.startRefs, tc.testRef)
+			err := SetObjectReference(tc.startRefs, tc.testRef)
+			if err != nil && !tc.shouldError {
+				t.Fatalf("Error occurred unexpectedly: %v", err)
+			}
+			if err != nil && tc.shouldError {
+				return
+			}
 			if !equality.Semantic.DeepEqual(*tc.startRefs, *tc.expectedRefs) {
 				t.Errorf("Unexpected object refs '%v', expected '%v'", tc.startRefs, tc.expectedRefs)
 			}
@@ -128,6 +142,7 @@ func TestRemoveObjectReference(t *testing.T) {
 		testRef      corev1.ObjectReference
 		startRefs    *[]corev1.ObjectReference
 		expectedRefs *[]corev1.ObjectReference
+		shouldError  bool
 	}{
 		{
 			name: "remove when empty",
@@ -139,6 +154,7 @@ func TestRemoveObjectReference(t *testing.T) {
 			},
 			startRefs:    &[]corev1.ObjectReference{},
 			expectedRefs: &[]corev1.ObjectReference{},
+			shouldError:  false,
 		},
 		{
 			name: "simple remove",
@@ -170,6 +186,7 @@ func TestRemoveObjectReference(t *testing.T) {
 					APIVersion: "test.example.io",
 				},
 			},
+			shouldError: false,
 		},
 		{
 			name: "remove last",
@@ -188,6 +205,7 @@ func TestRemoveObjectReference(t *testing.T) {
 				},
 			},
 			expectedRefs: &[]corev1.ObjectReference{},
+			shouldError:  false,
 		},
 		{
 			// Not sure if this is possible by using SetObjectReference
@@ -227,20 +245,43 @@ func TestRemoveObjectReference(t *testing.T) {
 					Name:       "bar",
 					APIVersion: "test.example.io",
 				},
+			},
+			shouldError: false,
+		},
+		{
+			name: "error on rmObject not minObjectReference",
+			testRef: corev1.ObjectReference{
+				Kind:       "FooKind",
+				APIVersion: "test.example.io",
+			},
+			startRefs: &[]corev1.ObjectReference{
 				corev1.ObjectReference{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
-					UID:        "myuid",
+				},
+				corev1.ObjectReference{
+					Kind:       "BarKind",
+					Namespace:  "test-namespace",
+					Name:       "bar",
+					APIVersion: "test.example.io",
 				},
 			},
+			expectedRefs: &[]corev1.ObjectReference{},
+			shouldError:  true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			RemoveObjectReference(tc.startRefs, tc.testRef)
+			err := RemoveObjectReference(tc.startRefs, tc.testRef)
+			if err != nil && !tc.shouldError {
+				t.Fatalf("Error occurred unexpectedly: %v", err)
+			}
+			if err != nil && tc.shouldError {
+				return
+			}
 			if !equality.Semantic.DeepEqual(*tc.startRefs, *tc.expectedRefs) {
 				t.Errorf("Unexpected object refs '%v', expected '%v'", tc.startRefs, tc.expectedRefs)
 			}
@@ -255,6 +296,7 @@ func TestFindObjectReference(t *testing.T) {
 		testRef     corev1.ObjectReference
 		startRefs   *[]corev1.ObjectReference
 		expectedRef *corev1.ObjectReference
+		shouldError bool
 	}{
 		{
 			name: "simple find",
@@ -278,6 +320,7 @@ func TestFindObjectReference(t *testing.T) {
 				Name:       "foo",
 				APIVersion: "test.example.io",
 			},
+			shouldError: false,
 		},
 		{
 			name: "find when empty",
@@ -289,12 +332,29 @@ func TestFindObjectReference(t *testing.T) {
 			},
 			startRefs:   &[]corev1.ObjectReference{},
 			expectedRef: nil,
+			shouldError: false,
+		},
+		{
+			name: "err when not minimal object reference",
+			testRef: corev1.ObjectReference{
+				Kind:       "FooKind",
+				APIVersion: "test.example.io",
+			},
+			startRefs:   &[]corev1.ObjectReference{},
+			expectedRef: nil,
+			shouldError: true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			foundRef := FindObjectReference(*tc.startRefs, tc.testRef)
+			foundRef, err := FindObjectReference(*tc.startRefs, tc.testRef)
+			if err != nil && !tc.shouldError {
+				t.Fatalf("Error occurred unexpectedly: %v", err)
+			}
+			if err != nil && tc.shouldError {
+				return
+			}
 			if !equality.Semantic.DeepEqual(foundRef, tc.expectedRef) {
 				t.Errorf("Unexpected object ref '%v', expected '%v'", foundRef, tc.expectedRef)
 			}

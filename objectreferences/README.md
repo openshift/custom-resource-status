@@ -39,3 +39,11 @@ objectreferencesv1.SetObjectReference(&instance.Status.RelatedObjects, *objectRe
 err = r.client.Status().Update(context.TODO(), instance)
 ...handle err
 ```
+
+**NOTE**: This package specifies a minimum for what constitutes a valid object
+reference. The minimum valid object reference consists of non-empty strings
+for the object's:
+
+* APIVersion
+* Kind
+* Name
