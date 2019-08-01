@@ -26,7 +26,7 @@ func TestSetObjectReference(t *testing.T) {
 			},
 			startRefs: &[]corev1.ObjectReference{},
 			expectedRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
@@ -44,7 +44,7 @@ func TestSetObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -52,13 +52,13 @@ func TestSetObjectReference(t *testing.T) {
 				},
 			},
 			expectedRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
@@ -77,13 +77,13 @@ func TestSetObjectReference(t *testing.T) {
 				UID:        "fooid",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -91,14 +91,14 @@ func TestSetObjectReference(t *testing.T) {
 				},
 			},
 			expectedRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
 					UID:        "fooid",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -165,13 +165,13 @@ func TestRemoveObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -179,7 +179,7 @@ func TestRemoveObjectReference(t *testing.T) {
 				},
 			},
 			expectedRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -197,7 +197,7 @@ func TestRemoveObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
@@ -218,19 +218,19 @@ func TestRemoveObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
@@ -239,7 +239,7 @@ func TestRemoveObjectReference(t *testing.T) {
 				},
 			},
 			expectedRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -255,13 +255,13 @@ func TestRemoveObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",
 					APIVersion: "test.example.io",
 				},
-				corev1.ObjectReference{
+				{
 					Kind:       "BarKind",
 					Namespace:  "test-namespace",
 					Name:       "bar",
@@ -307,7 +307,7 @@ func TestFindObjectReference(t *testing.T) {
 				APIVersion: "test.example.io",
 			},
 			startRefs: &[]corev1.ObjectReference{
-				corev1.ObjectReference{
+				{
 					Kind:       "FooKind",
 					Namespace:  "test-namespace",
 					Name:       "foo",

@@ -1,6 +1,11 @@
 Custom Resource Status
 ======================
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/openshift/custom-resource-status)](https://goreportcard.com/report/github.com/openshift/custom-resource-status)
+[![Go Doc](https://godoc.org/github.com/openshift/custom-resource-status?status.svg)](http://godoc.org/github.com/openshift/custom-resource-status)
+[![GitHub Issues](https://img.shields.io/github/issues/openshift/custom-resource-status.svg)](https://github.com/openshift/custom-resource-status/issues)
+[![Licensed under Apache License version 2.0](https://img.shields.io/github/license/openshift/custom-resource-status.svg?maxAge=2592000)](https://www.apache.org/licenses/LICENSE-2.0)
+
 The purpose of this project is to provide some level of standardization and
 best-practices with respect to managing the status of custom resources. This project
 steals, err draws from:
