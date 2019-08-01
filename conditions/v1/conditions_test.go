@@ -19,7 +19,7 @@ func TestSetStatusCondition(t *testing.T) {
 			},
 			startConditions: &[]Condition{},
 			expectedConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionAvailable,
 					Status:  "True",
 					Reason:  "Testing",
@@ -36,7 +36,7 @@ func TestSetStatusCondition(t *testing.T) {
 				Message: "Available condition true",
 			},
 			startConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "False",
 					Reason:  "TestingDegradedFalse",
@@ -44,13 +44,13 @@ func TestSetStatusCondition(t *testing.T) {
 				},
 			},
 			expectedConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionAvailable,
 					Status:  "True",
 					Reason:  "TestingAvailableTrue",
 					Message: "Available condition true",
 				},
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "False",
 					Reason:  "TestingDegradedFalse",
@@ -67,7 +67,7 @@ func TestSetStatusCondition(t *testing.T) {
 				Message: "Degraded condition true",
 			},
 			startConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "False",
 					Reason:  "TestingDegradedFalse",
@@ -75,7 +75,7 @@ func TestSetStatusCondition(t *testing.T) {
 				},
 			},
 			expectedConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "True",
 					Reason:  "TestingDegradedTrue",
@@ -112,13 +112,13 @@ func TestRemoveStatusCondition(t *testing.T) {
 			name:              "basic remove",
 			testConditionType: ConditionAvailable,
 			startConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionAvailable,
 					Status:  "True",
 					Reason:  "TestingAvailableTrue",
 					Message: "Available condition true",
 				},
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "False",
 					Reason:  "TestingDegradedFalse",
@@ -126,7 +126,7 @@ func TestRemoveStatusCondition(t *testing.T) {
 				},
 			},
 			expectedConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionDegraded,
 					Status:  "False",
 					Reason:  "TestingDegradedFalse",
@@ -138,7 +138,7 @@ func TestRemoveStatusCondition(t *testing.T) {
 			name:              "remove last condition",
 			testConditionType: ConditionAvailable,
 			startConditions: &[]Condition{
-				Condition{
+				{
 					Type:    ConditionAvailable,
 					Status:  "True",
 					Reason:  "TestingAvailableTrue",
