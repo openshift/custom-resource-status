@@ -1,6 +1,11 @@
 package v1
 
-import "testing"
+import (
+	"testing"
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 func TestSetStatusCondition(t *testing.T) {
 	testCases := []struct {
@@ -37,10 +42,11 @@ func TestSetStatusCondition(t *testing.T) {
 			},
 			startConditions: &[]Condition{
 				{
-					Type:    ConditionDegraded,
-					Status:  "False",
-					Reason:  "TestingDegradedFalse",
-					Message: "Degraded condition false",
+					Type:              ConditionDegraded,
+					Status:            "False",
+					Reason:            "TestingDegradedFalse",
+					Message:           "Degraded condition false",
+					LastHeartbeatTime: metav1.NewTime(time.Now()),
 				},
 			},
 			expectedConditions: &[]Condition{
@@ -70,6 +76,31 @@ func TestSetStatusCondition(t *testing.T) {
 				{
 					Type:    ConditionDegraded,
 					Status:  "False",
+					Reason:  "TestingDegradedFalse",
+					Message: "Degraded condition false",
+				},
+			},
+			expectedConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+		},
+		{
+			name: "last heartbeat",
+			testCondition: Condition{
+				Type:    ConditionDegraded,
+				Status:  "True",
+				Reason:  "TestingDegradedTrue",
+				Message: "Degraded condition true",
+			},
+			startConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
 					Reason:  "TestingDegradedFalse",
 					Message: "Degraded condition false",
 				},
@@ -113,16 +144,18 @@ func TestRemoveStatusCondition(t *testing.T) {
 			testConditionType: ConditionAvailable,
 			startConditions: &[]Condition{
 				{
-					Type:    ConditionAvailable,
-					Status:  "True",
-					Reason:  "TestingAvailableTrue",
-					Message: "Available condition true",
+					Type:              ConditionAvailable,
+					Status:            "True",
+					Reason:            "TestingAvailableTrue",
+					Message:           "Available condition true",
+					LastHeartbeatTime: metav1.NewTime(time.Now()),
 				},
 				{
-					Type:    ConditionDegraded,
-					Status:  "False",
-					Reason:  "TestingDegradedFalse",
-					Message: "Degraded condition false",
+					Type:              ConditionDegraded,
+					Status:            "False",
+					Reason:            "TestingDegradedFalse",
+					Message:           "Degraded condition false",
+					LastHeartbeatTime: metav1.NewTime(time.Now()),
 				},
 			},
 			expectedConditions: &[]Condition{
@@ -170,6 +203,14 @@ func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditi
 		}
 		if testCondition.Message != expectedCondition.Message {
 			t.Errorf("Unexpected message '%v', expected '%v'", testCondition.Message, expectedCondition.Message)
+		}
+		// Test for lastHeartbeatTime
+		if testCondition.LastHeartbeatTime.IsZero() {
+			t.Error("lastHeartbeatTime should never be zero")
+		}
+		timeNow := metav1.NewTime(time.Now())
+		if timeNow.Before(&testCondition.LastHeartbeatTime) {
+			t.Errorf("Unexpected lastHeartbeatTime '%v', should be before '%v'", testCondition.LastHeartbeatTime, timeNow)
 		}
 	}
 }
