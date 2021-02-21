@@ -10,7 +10,7 @@ Custom Resources, etc.).
 
 For example, we can add `RelatedObjects` to our Status struct:
 
-```
+```golang
 // ExampleAppStatus defines the observed state of ExampleApp
 type ExampleAppStatus struct {
   ...
@@ -22,7 +22,7 @@ type ExampleAppStatus struct {
 Then, through Reconcile, when an object we manage has been found we can add it to
 the `RelatedObjects` slice.
 
-```
+```golang
 found := &someAPI.SomeObject{}
 err := r.client.Get(context.TODO(), types.NamespacedName{Name: object.Name, Namespace: object.Namespace}, found)
 ...handle err
