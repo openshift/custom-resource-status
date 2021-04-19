@@ -120,6 +120,9 @@ func TestSetStatusCondition(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			SetStatusCondition(tc.startConditions, tc.testCondition)
 			compareConditions(t, tc.startConditions, tc.expectedConditions)
+
+			SetStatusConditionNoHeartbeat(tc.startConditions, tc.testCondition)
+			compareConditionsNoHeartbeat(t, tc.startConditions, tc.expectedConditions)
 		})
 	}
 
@@ -198,19 +201,41 @@ func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditi
 		if testCondition == nil {
 			t.Errorf("Condition type '%v' not found in '%v'", expectedCondition.Type, *gotConditions)
 		}
-		if testCondition.Status != expectedCondition.Status {
-			t.Errorf("Unexpected status '%v', expected '%v'", testCondition.Status, expectedCondition.Status)
-		}
-		if testCondition.Message != expectedCondition.Message {
-			t.Errorf("Unexpected message '%v', expected '%v'", testCondition.Message, expectedCondition.Message)
-		}
-		// Test for lastHeartbeatTime
-		if testCondition.LastHeartbeatTime.IsZero() {
-			t.Error("lastHeartbeatTime should never be zero")
-		}
-		timeNow := metav1.NewTime(time.Now())
-		if timeNow.Before(&testCondition.LastHeartbeatTime) {
-			t.Errorf("Unexpected lastHeartbeatTime '%v', should be before '%v'", testCondition.LastHeartbeatTime, timeNow)
-		}
+		compareCondition(t, testCondition, expectedCondition)
 	}
+}
+
+func compareCondition(t *testing.T, testCondition *Condition, expectedCondition Condition) {
+	compareConditionNoHeartbeat(t, testCondition, expectedCondition)
+	// Test for lastHeartbeatTime
+	if testCondition.LastHeartbeatTime.IsZero() {
+		t.Error("lastHeartbeatTime should never be zero")
+	}
+	timeNow := metav1.NewTime(time.Now())
+	if timeNow.Before(&testCondition.LastHeartbeatTime) {
+		t.Errorf("Unexpected lastHeartbeatTime '%v', should be before '%v'", testCondition.LastHeartbeatTime, timeNow)
+	}
+}
+
+func compareConditionsNoHeartbeat(t *testing.T, gotConditions *[]Condition, expectedConditions *[]Condition) {
+	for _, expectedCondition := range *expectedConditions {
+		testCondition := FindStatusCondition(*gotConditions, expectedCondition.Type)
+		if testCondition == nil {
+			t.Errorf("Condition type '%v' not found in '%v'", expectedCondition.Type, *gotConditions)
+		}
+		compareConditionNoHeartbeat(t, testCondition, expectedCondition)
+	}
+}
+
+func compareConditionNoHeartbeat(t *testing.T, testCondition *Condition, expectedCondition Condition) {
+	if testCondition.Status != expectedCondition.Status {
+		t.Errorf("Unexpected status '%v', expected '%v'", testCondition.Status, expectedCondition.Status)
+	}
+	if testCondition.Message != expectedCondition.Message {
+		t.Errorf("Unexpected message '%v', expected '%v'", testCondition.Message, expectedCondition.Message)
+	}
+	if testCondition.Reason != expectedCondition.Reason {
+		t.Errorf("Unexpected reason '%v', expected '%v'", testCondition.Reason, expectedCondition.Reason)
+	}
+
 }
