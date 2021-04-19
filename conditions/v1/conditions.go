@@ -8,7 +8,14 @@ import (
 )
 
 // SetStatusCondition sets the corresponding condition in conditions to newCondition.
+// update LastHeartbeatTime in any case
 func SetStatusCondition(conditions *[]Condition, newCondition Condition) {
+	SetStatusConditionV2(conditions, newCondition, true)
+}
+
+// SetStatusConditionV2 sets the corresponding condition in conditions to newCondition.
+// if alwaysUpdateHeartBeat isd set to false , LastHeartbeatTime will not be updated
+func SetStatusConditionV2(conditions *[]Condition, newCondition Condition, alwaysUpdateHeartBeat bool) {
 	if conditions == nil {
 		conditions = &[]Condition{}
 	}
@@ -25,10 +32,16 @@ func SetStatusCondition(conditions *[]Condition, newCondition Condition) {
 		existingCondition.LastTransitionTime = metav1.NewTime(time.Now())
 	}
 
-	existingCondition.Reason = newCondition.Reason
-	existingCondition.Message = newCondition.Message
-	existingCondition.LastHeartbeatTime = metav1.NewTime(time.Now())
+	if existingCondition.Reason != newCondition.Reason || existingCondition.Message != newCondition.Message {
+		existingCondition.Reason = newCondition.Reason
+		existingCondition.Message = newCondition.Message
+		existingCondition.LastHeartbeatTime = metav1.NewTime(time.Now())
+	} else if alwaysUpdateHeartBeat {
+		existingCondition.LastHeartbeatTime = metav1.NewTime(time.Now())
+	}
 }
+
+
 
 // RemoveStatusCondition removes the corresponding conditionType from conditions.
 func RemoveStatusCondition(conditions *[]Condition, conditionType ConditionType) {

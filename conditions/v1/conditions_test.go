@@ -119,7 +119,107 @@ func TestSetStatusCondition(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			SetStatusCondition(tc.startConditions, tc.testCondition)
-			compareConditions(t, tc.startConditions, tc.expectedConditions)
+			compareConditions(t, tc.startConditions, tc.expectedConditions, false)
+		})
+	}
+
+	return
+}
+
+// need to validate only case that is not validated by TestSetStatusCondition
+func TestSetStatusConditionV2(t *testing.T) {
+	testCases := []struct {
+		name               string
+		testCondition      Condition
+		startConditions    *[]Condition
+		expectedConditions *[]Condition
+		validateHearBeatWasNotSet bool
+	}{
+		{
+			name: "last heartbeat was not set",
+			validateHearBeatWasNotSet: true,
+			testCondition: Condition{
+				Type:    ConditionDegraded,
+				Status:  "True",
+				Reason:  "TestingDegradedTrue",
+				Message: "Degraded condition true",
+			},
+			startConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedFalse",
+					Message: "Degraded condition false",
+				},
+			},
+			expectedConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+		},
+		{
+			name: "last heartbeat was set",
+			validateHearBeatWasNotSet: false,
+			testCondition: Condition{
+				Type:    ConditionDegraded,
+				Status:  "True",
+				Reason:  "TestingDegradedTrue",
+				Message: "Degraded condition true",
+			},
+			startConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition false",
+				},
+			},
+			expectedConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+		},
+		{
+
+			name: "last heartbeat was set - status changed",
+			validateHearBeatWasNotSet: false,
+			testCondition: Condition{
+				Type:    ConditionDegraded,
+				Status:  "True",
+				Reason:  "TestingDegradedTrue",
+				Message: "Degraded condition true",
+			},
+			startConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "False",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition false",
+				},
+			},
+			expectedConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			SetStatusConditionV2(tc.startConditions, tc.testCondition, false)
+			compareConditions(t, tc.startConditions, tc.expectedConditions, tc.validateHearBeatWasNotSet)
 		})
 	}
 
@@ -185,14 +285,14 @@ func TestRemoveStatusCondition(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			RemoveStatusCondition(tc.startConditions, tc.testConditionType)
-			compareConditions(t, tc.startConditions, tc.expectedConditions)
+			compareConditions(t, tc.startConditions, tc.expectedConditions, false)
 		})
 	}
 
 	return
 }
 
-func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditions *[]Condition) {
+func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditions *[]Condition, validateHearBeatWasNotSet bool) {
 	for _, expectedCondition := range *expectedConditions {
 		testCondition := FindStatusCondition(*gotConditions, expectedCondition.Type)
 		if testCondition == nil {
@@ -204,13 +304,20 @@ func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditi
 		if testCondition.Message != expectedCondition.Message {
 			t.Errorf("Unexpected message '%v', expected '%v'", testCondition.Message, expectedCondition.Message)
 		}
-		// Test for lastHeartbeatTime
-		if testCondition.LastHeartbeatTime.IsZero() {
-			t.Error("lastHeartbeatTime should never be zero")
+		if !validateHearBeatWasNotSet {
+			// Test for lastHeartbeatTime
+			if testCondition.LastHeartbeatTime.IsZero() {
+				t.Error("lastHeartbeatTime should never be zero")
+			}
+			timeNow := metav1.NewTime(time.Now())
+			if timeNow.Before(&testCondition.LastHeartbeatTime) {
+				t.Errorf("Unexpected lastHeartbeatTime '%v', should be before '%v'", testCondition.LastHeartbeatTime, timeNow)
+			}
+		} else {
+			if testCondition.LastHeartbeatTime.IsZero() {
+				t.Error("lastHeartbeatTime should not be set")
+			}
 		}
-		timeNow := metav1.NewTime(time.Now())
-		if timeNow.Before(&testCondition.LastHeartbeatTime) {
-			t.Errorf("Unexpected lastHeartbeatTime '%v', should be before '%v'", testCondition.LastHeartbeatTime, timeNow)
-		}
+
 	}
 }
