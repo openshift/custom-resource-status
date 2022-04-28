@@ -31,14 +31,17 @@ instance := &examplev1alpha1.ExampleApp{}
 err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 ...handle err
 
-conditions.SetStatusCondition(&instance.Status.Conditions, conditions.Condition{
+changed := conditions.SetStatusCondition(&instance.Status.Conditions, conditions.Condition{
   Type:   conditions.ConditionAvailable,
   Status: corev1.ConditionFalse,
   Reason: "ReconcileStarted",
   Message: "Reconciling resource"
 })
 
-// Update the status
-err = r.client.Status().Update(context.TODO(), instance)
-...handle err
+// To avoid thrashing, only update the status on the server if SetStatusCondition changed
+// something (other than the heartbeat).
+if changed {
+  err = r.client.Status().Update(context.TODO(), instance)
+  ...handle err
+}
 ```

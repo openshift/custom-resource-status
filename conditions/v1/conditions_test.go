@@ -13,6 +13,7 @@ func TestSetStatusCondition(t *testing.T) {
 		testCondition      Condition
 		startConditions    *[]Condition
 		expectedConditions *[]Condition
+		expectChanged      bool
 	}{
 		{
 			name: "add when empty",
@@ -31,6 +32,7 @@ func TestSetStatusCondition(t *testing.T) {
 					Message: "Basic message",
 				},
 			},
+			expectChanged: true,
 		},
 		{
 			name: "add to conditions",
@@ -63,6 +65,7 @@ func TestSetStatusCondition(t *testing.T) {
 					Message: "Degraded condition false",
 				},
 			},
+			expectChanged: true,
 		},
 		{
 			name: "replace condition",
@@ -88,6 +91,7 @@ func TestSetStatusCondition(t *testing.T) {
 					Message: "Degraded condition true",
 				},
 			},
+			expectChanged: true,
 		},
 		{
 			name: "last heartbeat",
@@ -113,20 +117,57 @@ func TestSetStatusCondition(t *testing.T) {
 					Message: "Degraded condition true",
 				},
 			},
+			expectChanged: true,
+		},
+		{
+			name: "no change",
+			testCondition: Condition{
+				Type:    ConditionDegraded,
+				Status:  "True",
+				Reason:  "TestingDegradedTrue",
+				Message: "Degraded condition true",
+			},
+			startConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+			expectedConditions: &[]Condition{
+				{
+					Type:    ConditionDegraded,
+					Status:  "True",
+					Reason:  "TestingDegradedTrue",
+					Message: "Degraded condition true",
+				},
+			},
+			expectChanged: false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			SetStatusCondition(tc.startConditions, tc.testCondition)
-			compareConditions(t, tc.startConditions, tc.expectedConditions)
+			// Copy tc.startConditions so it doesn't get updated in place
+			startConditions := make([]Condition, len(*tc.startConditions))
+			copy(startConditions, *tc.startConditions)
+			changed := SetStatusCondition(&startConditions, tc.testCondition)
+			if changed != tc.expectChanged {
+				t.Errorf("Unexpected return from SetStatusCondition: expected: %t; actual: %t", tc.expectChanged, changed)
+			}
+			compareConditions(t, &startConditions, tc.expectedConditions)
 
-			SetStatusConditionNoHeartbeat(tc.startConditions, tc.testCondition)
-			compareConditionsNoHeartbeat(t, tc.startConditions, tc.expectedConditions)
+			// reset
+			startConditions = make([]Condition, len(*tc.startConditions))
+			copy(startConditions, *tc.startConditions)
+			changed = SetStatusConditionNoHeartbeat(&startConditions, tc.testCondition)
+			if changed != tc.expectChanged {
+				t.Errorf("Unexpected return from SetStatusConditionNoHeartbeat: expected: %t; actual: %t", tc.expectChanged, changed)
+			}
+			compareConditionsNoHeartbeat(t, &startConditions, tc.expectedConditions)
 		})
 	}
-
-	return
 }
 
 func TestRemoveStatusCondition(t *testing.T) {
@@ -191,8 +232,6 @@ func TestRemoveStatusCondition(t *testing.T) {
 			compareConditions(t, tc.startConditions, tc.expectedConditions)
 		})
 	}
-
-	return
 }
 
 func compareConditions(t *testing.T, gotConditions *[]Condition, expectedConditions *[]Condition) {
